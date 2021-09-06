@@ -26,9 +26,13 @@ class _RandomWordsState extends State<RandomWords> {
     return Scaffold(
     appBar: AppBar(
       title: const Text('Random Name Generator'),
+      actions: [
+          IconButton(icon: Icon(Icons.list), onPressed: _pushSaved),
+        ],
     ),
     body: _buildSuggestions(),
   );
+  
   }
   Widget _buildSuggestions() {
   return ListView.builder(
@@ -53,7 +57,46 @@ Widget _buildRow(WordPair pair) {
     trailing: Icon(   // NEW from here... 
       alreadySaved ? Icons.favorite : Icons.favorite_border,
       color: alreadySaved ? Colors.red : null,
-    ),          
+    ),
+    onTap: () {      // NEW lines from here...
+      setState(() {
+        if (alreadySaved) {
+          _saved.remove(pair);
+        } else { 
+          _saved.add(pair); 
+        } 
+      });
+    },          
   );
 }
+
+   void _pushSaved() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        // NEW lines from here...
+        builder: (BuildContext context) {
+          final tiles = _saved.map(
+            (WordPair pair) {
+              return ListTile(
+                title: Text(
+                  pair.asPascalCase,
+                  style: _biggerFont,
+                ),
+              );
+            },
+          );
+          final divided = tiles.isNotEmpty
+              ? ListTile.divideTiles(context: context, tiles: tiles).toList()
+              : <Widget>[];
+
+          return Scaffold(
+            appBar: AppBar(
+              title: Text('Saved Suggestions'),
+            ),
+            body: ListView(children: divided),
+          );
+        }, // ...to here.
+      ),
+    );
+  }
 }
